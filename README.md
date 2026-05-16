@@ -1,6 +1,6 @@
 # aws-task-manager-api
 
-A small task manager REST API written in Python with FastAPI. It runs on SQLite out of the box, swaps to PostgreSQL with a single env var, and has an optional S3 attachments path. The whole point of the project is to show backend fundamentals plus how the same code deploys onto AWS (EC2 + RDS + S3) in a production-shaped way.
+A small task manager REST API written in Python with FastAPI. It runs on SQLite out of the box, swaps to PostgreSQL with a single env var, and has an optional S3 attachments path. I built it to practice backend fundamentals while keeping the path to AWS deployment clear: EC2 for the API, RDS for Postgres, and S3 for uploaded files.
 
 [![ci](https://github.com/gabrielchangamire-arch/aws-task-manager-api/actions/workflows/ci.yml/badge.svg)](https://github.com/gabrielchangamire-arch/aws-task-manager-api/actions/workflows/ci.yml)
 
@@ -44,6 +44,8 @@ This brings up Postgres and the API. `DATABASE_URL` inside the container points 
 ```
 
 The S3 tests use [`moto`](https://github.com/getmoto/moto) so they run without real AWS credentials.
+
+For the QA angle behind the endpoint coverage, see [`docs/API_TEST_STRATEGY.md`](docs/API_TEST_STRATEGY.md).
 
 ## API examples
 
@@ -97,7 +99,7 @@ app/
   storage/
     s3.py            optional S3 attachment client
 tests/                pytest, uses TestClient + moto
-docs/aws-deployment.md   step-by-step EC2 + RDS + S3 walkthrough
+docs/                 AWS walkthrough + API test strategy
 iam/                  least-privilege policy + EC2 trust policy
 scripts/              run-dev.sh, smoke.sh
 Dockerfile
@@ -114,7 +116,7 @@ See [`docs/aws-deployment.md`](docs/aws-deployment.md) for the full walkthrough.
 - **S3** holds attachment files. App writes under a `tasks/` prefix, scoped by IAM.
 - **IAM** instance role grants only `s3:GetObject`/`PutObject`/`DeleteObject` on `tasks/*` of the one bucket — no wildcards, no console access.
 
-## AWS Skills Demonstrated
+## AWS pieces in the project
 
 - **EC2** – running the containerized app on a t3.micro.
 - **RDS / PostgreSQL** – managed Postgres connected via `DATABASE_URL`.
@@ -124,7 +126,7 @@ See [`docs/aws-deployment.md`](docs/aws-deployment.md) for the full walkthrough.
 - **Environment-based config** – same image runs locally (SQLite, no S3) and in AWS (Postgres + S3) by changing env vars.
 - **Docker** – multi-stage-friendly slim image, healthcheck, runs as non-root.
 - **GitHub Actions CI** – lint/compile + tests on every push and PR.
-- **Cloud debugging mindset** – clear logs, structured handlers, `/health` checks DB connectivity.
+- **Cloud debugging** – clear logs, structured handlers, `/health` checks DB connectivity.
 
 ## Design decisions
 
